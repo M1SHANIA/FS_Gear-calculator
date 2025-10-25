@@ -1,0 +1,262 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 0.95em;
+}
+
+.input-section {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  transition: all 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.gear-chain {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 2px solid #e0e0e0;
+}
+
+.gear-chain h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+}
+
+.gear-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 10px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.add-stage {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  padding: 10px 20px;
+  font-size: 0.95em;
+  margin-top: 10px;
+}
+
+.remove-stage {
+  background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+  padding: 8px 15px;
+  font-size: 0.85em;
+  margin-top: 10px;
+  width: auto;
+}
+
+.result-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px;
+  border-radius: 15px;
+  color: white;
+  margin-top: 25px;
+  display: none;
+}
+
+.result-section.show {
+  display: block;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.result-item:last-child {
+  margin-bottom: 0;
+}
+
+.result-label {
+  font-size: 0.9em;
+  opacity: 0.9;
+  margin-bottom: 5px;
+}
+
+.result-value {
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+.formula {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+
+.stages-container {
+  margin-top: 15px;
+}
+
+.info-box {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  color: #1565c0;
+  font-size: 0.9em;
+}
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-select {
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95em;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.config-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.config-select:hover {
+  border-color: #667eea;
+}
+
+/* Shared utility styles moved from inline attributes */
+.link-highlight {
+  color: #1565c0;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.card-panel {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 2px solid #e0e0e0;
+}
+
+.panel-title {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.label-strong {
+  font-weight: bold;
+  color: #333;
+}
+
+.gear-list-input {
+  width: 100%;
+  margin-top: 6px;
+}
