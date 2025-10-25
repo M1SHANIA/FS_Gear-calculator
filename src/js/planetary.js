@@ -78,72 +78,67 @@ function calculatePlanetary() {
         let currentInputSpeed = parseFloat(document.getElementById('inputSpeed').value);
         if (isNaN(currentInputSpeed)) { alert('Please enter a valid input speed!'); return; }
 
+        // Read global roles
+        const roleInput = document.getElementById('roleInput').value; // 'sun'|'carrier'|'ring'
+        const roleOutput = document.getElementById('roleOutput').value;
+        if (!roleInput || !roleOutput || roleInput === roleOutput) { alert('Please select different Input and Output components.'); return; }
+        const roleFixed = ['sun', 'carrier', 'ring'].filter(x => x !== roleInput && x !== roleOutput)[0];
+
+        // Build per-component config strings used by computeStage
+        const sunConfig = (roleInput === 'sun') ? 'input' : (roleOutput === 'sun') ? 'output' : 'fixed';
+        const carrierConfig = (roleInput === 'carrier') ? 'input' : (roleOutput === 'carrier') ? 'output' : 'fixed';
+        const ringConfig = (roleInput === 'ring') ? 'input' : (roleOutput === 'ring') ? 'output' : 'fixed';
+
+        // read main stage (stage 1) teeth
+        const sunTeethMain = parseFloat(document.getElementById('sunTeeth-1').value);
+        const planetTeeth1 = parseFloat(document.getElementById('planetTeeth-1').value);
+        const ringTeethMain = parseFloat(document.getElementById('ringTeeth-1').value);
+        const numPlanetsMain = parseFloat(document.getElementById('numPlanets-1').value);
+        if ([sunTeethMain, planetTeeth1, ringTeethMain].some(v => isNaN(v) || v <= 0)) { alert('Please enter valid sun/planet/ring teeth for stage 1'); return; }
+
         let totalRatio = 1;
         let stageResults = [];
 
-        for (let s = 1; s <= stageCount; s++) {
-            // read per-stage values from DOM with suffix
-            const sunConfig = document.getElementById(`sunConfig-${s}`).value;
-            const carrierConfig = document.getElementById(`carrierConfig-${s}`).value;
-            const ringConfig = document.getElementById(`ringConfig-${s}`).value;
+        // Stage 1: full planetary
+        const res1 = computeStage({ sunConfig, carrierConfig, ringConfig, inputSpeed: currentInputSpeed, sunTeeth: sunTeethMain, planetTeeth: planetTeeth1, ringTeeth: ringTeethMain, numPlanets: numPlanetsMain });
+        if (!isFinite(res1.gearRatio)) { alert('Stage 1 computed an invalid gear ratio.'); return; }
+        totalRatio *= res1.gearRatio;
+        stageResults.push({ stage: 1, ...res1 });
+        currentInputSpeed = res1.outputSpeed;
 
-            const sunTeeth = parseFloat(document.getElementById(`sunTeeth-${s}`).value);
-            const planetTeeth = parseFloat(document.getElementById(`planetTeeth-${s}`).value);
-            const ringTeeth = parseFloat(document.getElementById(`ringTeeth-${s}`).value);
-            const numPlanets = parseFloat(document.getElementById(`numPlanets-${s}`).value);
+        // Additional rows (treat each added planet row as a separate half-stage)
+        for (let s = 2; s <= stageCount; s++) {
+            const planetTeethS = parseFloat(document.getElementById(`planetTeeth-${s}`).value);
+            if (isNaN(planetTeethS) || planetTeethS <= 0) { alert(`Please enter valid planet teeth for stage ${s}`); return; }
 
-            // basic validation per stage
-            if ([sunTeeth, planetTeeth, ringTeeth].some(v => isNaN(v) || v <= 0)) {
-                alert(`Please enter valid positive teeth counts for stage ${s}!`);
-                return;
-            }
+            // Interpret the added planet row as a half-stage where its sun gear = planetTeethS and ring = main ring
+            const sunTeethS = planetTeethS;
+            const ringTeethS = ringTeethMain;
+            // use same numPlanets as main stage unless a specific field exists
+            const numPlanetsS = isFinite(parseFloat(document.getElementById(`numPlanets-${s}`)?.value)) ? parseFloat(document.getElementById(`numPlanets-${s}`).value) : numPlanetsMain;
 
-            // Ensure exactly one fixed per stage
-            const configs = [sunConfig, carrierConfig, ringConfig];
-            const fixedCount = configs.filter(c => c === 'fixed').length;
-            const inputCount = configs.filter(c => c === 'input').length;
-            if (fixedCount !== 1 || inputCount !== 1) {
-                alert(`Stage ${s}: please select exactly one Input and one Fixed component (the other may be Output).`);
-                return;
-            }
-
-            const res = computeStage({ sunConfig, carrierConfig, ringConfig, inputSpeed: currentInputSpeed, sunTeeth, planetTeeth, ringTeeth, numPlanets });
-
-            // If computed gearRatio is 0 or NaN, guard
-            if (!isFinite(res.gearRatio)) {
-                alert(`Stage ${s} computed an invalid gear ratio.`);
-                return;
-            }
-
+            const res = computeStage({ sunConfig, carrierConfig, ringConfig, inputSpeed: currentInputSpeed, sunTeeth: sunTeethS, planetTeeth: planetTeethS, ringTeeth: ringTeethS, numPlanets: numPlanetsS });
+            if (!isFinite(res.gearRatio)) { alert(`Stage ${s} computed an invalid gear ratio.`); return; }
             totalRatio *= res.gearRatio;
             stageResults.push({ stage: s, ...res });
-            // feed output as next input
             currentInputSpeed = res.outputSpeed;
         }
 
         // Display combined results
         const finalOutput = currentInputSpeed;
-
         document.getElementById('outputSpeed').textContent = finalOutput.toFixed(6) + ' rpm';
-        // show total ratio in decimal and approximate N:1
         const totalDisplay = totalRatio.toFixed(6);
         let ratioText;
         if (totalRatio === 0) ratioText = '0:1';
         else if (Math.abs(totalRatio) >= 1) ratioText = Math.abs(totalRatio).toFixed(3) + ':1';
         else ratioText = (1 / Math.abs(totalRatio)).toFixed(3) + ':1';
         document.getElementById('gearRatio').textContent = `${totalDisplay} / ${ratioText}`;
-
-        // internal ratio: show per-stage K values
         document.getElementById('internalRatio').textContent = stageResults.map(r => r.internalRatio.toFixed(3)).join(', ');
 
-        // Build calculation text with per-stage details
         let formulaText = '';
-        stageResults.forEach(r => {
-            formulaText += `Stage ${r.stage}: ${r.formula}\n`;
-        });
+        stageResults.forEach(r => { formulaText += `Stage ${r.stage}: ${r.formula}\n`; });
         formulaText += `\nTotal combined gear ratio (product of stage ratios): ${totalRatio.toFixed(6)}\n`;
         formulaText += `Final output speed: ${finalOutput.toFixed(6)} rpm`;
-
         document.getElementById('calculation').textContent = formulaText;
         document.getElementById('resultSection').classList.add('show');
     } catch (err) {
@@ -184,7 +179,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const remBtn = document.getElementById('removeStageBtn');
     if (addBtn) addBtn.addEventListener('click', addStageUI);
     if (remBtn) remBtn.addEventListener('click', removeStageUI);
+    // wire global role pickers to update the Fixed display
+    const inGlobal = document.getElementById('roleInput');
+    const outGlobal = document.getElementById('roleOutput');
+    const fixedDisplay = document.getElementById('roleFixed');
+    function updateFixed() {
+        if (!inGlobal || !outGlobal || !fixedDisplay) return;
+        const a = inGlobal.value, b = outGlobal.value;
+        if (!a || !b) { fixedDisplay.textContent = '-'; return; }
+        if (a === b) { fixedDisplay.textContent = 'Choose different'; return; }
+        const fixed = ['sun', 'carrier', 'ring'].filter(x => x !== a && x !== b)[0];
+        fixedDisplay.textContent = fixed.charAt(0).toUpperCase() + fixed.slice(1);
+    }
+    if (inGlobal) inGlobal.addEventListener('change', updateFixed);
+    if (outGlobal) outGlobal.addEventListener('change', updateFixed);
+    updateFixed();
 });
+
+// Sync role-picker choices into the underlying per-component selects (sunConfig, carrierConfig, ringConfig)
+// (Per-stage role helpers removed — we use global role selectors now.)
 
 // Allow Enter key to calculate
 document.addEventListener('keypress', function (e) {
