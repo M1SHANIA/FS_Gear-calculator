@@ -21,41 +21,22 @@
       </div>
 
       <div class="input-section">
-        <!-- Component Configuration -->
-        <div class="card-panel">
-          <h3 class="panel-title">Component Configuration</h3>
-
-          <div class="config-grid">
-            <div class="config-item">
-              <label class="label-strong">Sun Gear:</label>
-              <select id="sunConfig" class="config-select">
-                <option value="input">Input</option>
-                <option value="output">Output</option>
-                <option value="fixed">Fixed</option>
-              </select>
-            </div>
-
-            <div class="config-item">
-              <label class="label-strong">Planet Carrier:</label>
-              <select id="carrierConfig" class="config-select">
-                <option value="input">Input</option>
-                <option value="output" selected>Output</option>
-                <option value="fixed">Fixed</option>
-              </select>
-            </div>
-
-            <div class="config-item">
-              <label class="label-strong">Ring Gear:</label>
-              <select id="ringConfig" class="config-select">
-                <option value="input">Input</option>
-                <option value="output">Output</option>
-                <option value="fixed" selected>Fixed</option>
-              </select>
-            </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label for="stageCount">Number of stages:</label>
+            <select id="stageCount">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+          <div class="btn-group">
+            <button id="addStageBtn" type="button">Add Stage</button>
+            <button id="removeStageBtn" type="button">Remove Stage</button>
           </div>
         </div>
 
-        <!-- Input Speed -->
+        <!-- Global Input Speed -->
         <div class="input-group">
           <label for="inputSpeed">Input Speed (rpm):</label>
           <input
@@ -66,54 +47,274 @@
             value="1"
           />
         </div>
+        <div id="stagesContainer">
+          <!-- Stage 1 (default) -->
+          <div class="stage-block" id="stage-1">
+            <!-- Component Configuration -->
+            <div class="card-panel">
+              <h3 class="panel-title">Stage 1 - Component Configuration</h3>
 
-        <!-- Gear Parameters -->
-        <div class="card-panel">
-          <h3 class="panel-title">Gear Parameters</h3>
+              <div class="config-grid">
+                <div class="config-item">
+                  <label class="label-strong">Sun Gear:</label>
+                  <select id="sunConfig-1" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
 
-          <div class="input-group">
-            <label for="sunTeeth">Sun Gear Teeth (z_c):</label>
-            <input
-              type="number"
-              id="sunTeeth"
-              placeholder="e.g., 18"
-              step="1"
-              min="1"
-            />
+                <div class="config-item">
+                  <label class="label-strong">Planet Carrier:</label>
+                  <select id="carrierConfig-1" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output" selected>Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+
+                <div class="config-item">
+                  <label class="label-strong">Ring Gear:</label>
+                  <select id="ringConfig-1" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed" selected>Fixed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- per-stage note -->
+            <div class="input-group">
+              <small
+                >Input speed is global (set above). Per-stage inputs are teeth
+                and component roles.</small
+              >
+            </div>
+
+            <!-- Gear Parameters -->
+            <div class="card-panel">
+              <h3 class="panel-title">Stage 1 - Gear Parameters</h3>
+
+              <div class="input-group">
+                <label for="sunTeeth-1">Sun Gear Teeth (z_c):</label>
+                <input
+                  type="number"
+                  id="sunTeeth-1"
+                  placeholder="e.g., 18"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="planetTeeth-1">Planet Gear Teeth (z_s):</label>
+                <input
+                  type="number"
+                  id="planetTeeth-1"
+                  placeholder="e.g., 22"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="ringTeeth-1">Ring Gear Teeth (z_k):</label>
+                <input
+                  type="number"
+                  id="ringTeeth-1"
+                  placeholder="e.g., 59"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="numPlanets-1">Number of Planets:</label>
+                <input
+                  type="number"
+                  id="numPlanets-1"
+                  placeholder="e.g., 3"
+                  step="1"
+                  min="1"
+                  value="3"
+                />
+              </div>
+            </div>
           </div>
 
-          <div class="input-group">
-            <label for="planetTeeth">Planet Gear Teeth (z_s):</label>
-            <input
-              type="number"
-              id="planetTeeth"
-              placeholder="e.g., 22"
-              step="1"
-              min="1"
-            />
+          <!-- Stage 2 (hidden by default) -->
+          <div class="stage-block" id="stage-2" style="display: none">
+            <!-- Component Configuration -->
+            <div class="card-panel">
+              <h3 class="panel-title">Stage 2 - Component Configuration</h3>
+
+              <div class="config-grid">
+                <div class="config-item">
+                  <label class="label-strong">Sun Gear:</label>
+                  <select id="sunConfig-2" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+
+                <div class="config-item">
+                  <label class="label-strong">Planet Carrier:</label>
+                  <select id="carrierConfig-2" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+
+                <div class="config-item">
+                  <label class="label-strong">Ring Gear:</label>
+                  <select id="ringConfig-2" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gear Parameters -->
+            <div class="card-panel">
+              <h3 class="panel-title">Stage 2 - Gear Parameters</h3>
+
+              <div class="input-group">
+                <label for="sunTeeth-2">Sun Gear Teeth (z_c):</label>
+                <input
+                  type="number"
+                  id="sunTeeth-2"
+                  placeholder="e.g., 18"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="planetTeeth-2">Planet Gear Teeth (z_s):</label>
+                <input
+                  type="number"
+                  id="planetTeeth-2"
+                  placeholder="e.g., 22"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="ringTeeth-2">Ring Gear Teeth (z_k):</label>
+                <input
+                  type="number"
+                  id="ringTeeth-2"
+                  placeholder="e.g., 59"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="numPlanets-2">Number of Planets:</label>
+                <input
+                  type="number"
+                  id="numPlanets-2"
+                  placeholder="e.g., 3"
+                  step="1"
+                  min="1"
+                  value="3"
+                />
+              </div>
+            </div>
           </div>
 
-          <div class="input-group">
-            <label for="ringTeeth">Ring Gear Teeth (z_k):</label>
-            <input
-              type="number"
-              id="ringTeeth"
-              placeholder="e.g., 59"
-              step="1"
-              min="1"
-            />
-          </div>
+          <!-- Stage 3 (hidden by default) -->
+          <div class="stage-block" id="stage-3" style="display: none">
+            <!-- Component Configuration -->
+            <div class="card-panel">
+              <h3 class="panel-title">Stage 3 - Component Configuration</h3>
 
-          <div class="input-group">
-            <label for="numPlanets">Number of Planets:</label>
-            <input
-              type="number"
-              id="numPlanets"
-              placeholder="e.g., 3"
-              step="1"
-              min="1"
-              value="3"
-            />
+              <div class="config-grid">
+                <div class="config-item">
+                  <label class="label-strong">Sun Gear:</label>
+                  <select id="sunConfig-3" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+
+                <div class="config-item">
+                  <label class="label-strong">Planet Carrier:</label>
+                  <select id="carrierConfig-3" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+
+                <div class="config-item">
+                  <label class="label-strong">Ring Gear:</label>
+                  <select id="ringConfig-3" class="config-select">
+                    <option value="input">Input</option>
+                    <option value="output">Output</option>
+                    <option value="fixed">Fixed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gear Parameters -->
+            <div class="card-panel">
+              <h3 class="panel-title">Stage 3 - Gear Parameters</h3>
+
+              <div class="input-group">
+                <label for="sunTeeth-3">Sun Gear Teeth (z_c):</label>
+                <input
+                  type="number"
+                  id="sunTeeth-3"
+                  placeholder="e.g., 18"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="planetTeeth-3">Planet Gear Teeth (z_s):</label>
+                <input
+                  type="number"
+                  id="planetTeeth-3"
+                  placeholder="e.g., 22"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="ringTeeth-3">Ring Gear Teeth (z_k):</label>
+                <input
+                  type="number"
+                  id="ringTeeth-3"
+                  placeholder="e.g., 59"
+                  step="1"
+                  min="1"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="numPlanets-3">Number of Planets:</label>
+                <input
+                  type="number"
+                  id="numPlanets-3"
+                  placeholder="e.g., 3"
+                  step="1"
+                  min="1"
+                  value="3"
+                />
+              </div>
+            </div>
           </div>
         </div>
 

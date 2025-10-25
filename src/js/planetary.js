@@ -1,148 +1,190 @@
-function calculatePlanetary() {
-    // Get configuration
-    const sunConfig = document.getElementById('sunConfig').value;
-    const carrierConfig = document.getElementById('carrierConfig').value;
-    const ringConfig = document.getElementById('ringConfig').value;
+// Helper: compute single planetary stage given parameters.
+function computeStage(params) {
+    // params: {sunConfig, carrierConfig, ringConfig, inputSpeed, sunTeeth, planetTeeth, ringTeeth, numPlanets}
+    let { sunConfig, carrierConfig, ringConfig, inputSpeed, sunTeeth, planetTeeth, ringTeeth, numPlanets } = params;
 
-    // Get input values
-    const inputSpeed = parseFloat(document.getElementById('inputSpeed').value);
-    const sunTeeth = parseFloat(document.getElementById('sunTeeth').value);
-    const planetTeeth = parseFloat(document.getElementById('planetTeeth').value);
-    const ringTeeth = parseFloat(document.getElementById('ringTeeth').value);
-    const numPlanets = parseFloat(document.getElementById('numPlanets').value);
+    // Basic validation
+    if (isNaN(inputSpeed)) throw new Error('Invalid input speed');
+    if ([sunTeeth, planetTeeth, ringTeeth].some(v => isNaN(v) || v <= 0)) throw new Error('Invalid gear teeth');
+    if (isNaN(numPlanets) || numPlanets <= 0) throw new Error('Invalid number of planets');
 
-    // Validation
-    if (isNaN(inputSpeed)) {
-        alert('Please enter a valid input speed!');
-        return;
-    }
-
-    if (isNaN(sunTeeth) || sunTeeth <= 0 || isNaN(planetTeeth) || planetTeeth <= 0 || isNaN(ringTeeth) || ringTeeth <= 0) {
-        alert('Please enter valid positive numbers for all gear teeth!');
-        return;
-    }
-
-    if (isNaN(numPlanets) || numPlanets <= 0) {
-        alert('Please enter a valid number of planets!');
-        return;
-    }
-
-    // Check that exactly one component is input, one is output, and one is fixed
-    const configs = [sunConfig, carrierConfig, ringConfig];
-    const inputCount = configs.filter(c => c === 'input').length;
-    const outputCount = configs.filter(c => c === 'output').length;
-    const fixedCount = configs.filter(c => c === 'fixed').length;
-
-    if (inputCount !== 1 || outputCount !== 1 || fixedCount !== 1) {
-        alert('Please select exactly one Input, one Output, and one Fixed component!');
-        return;
-    }
-
-    // Calculate internal ratio K
     const K = ringTeeth / sunTeeth;
 
-    // Initialize speeds (we'll calculate based on configuration)
-    let sunSpeed = 0;
-    let carrierSpeed = 0;
-    let ringSpeed = 0;
+    // initialize
+    let sunSpeed = 0, carrierSpeed = 0, ringSpeed = 0;
 
-    // Determine which component is fixed and set its speed to 0
     if (sunConfig === 'fixed') sunSpeed = 0;
     if (carrierConfig === 'fixed') carrierSpeed = 0;
     if (ringConfig === 'fixed') ringSpeed = 0;
 
-    // Set input speed
     if (sunConfig === 'input') sunSpeed = inputSpeed;
     if (carrierConfig === 'input') carrierSpeed = inputSpeed;
     if (ringConfig === 'input') ringSpeed = inputSpeed;
 
-    // Basic kinematic equation: n_k × z_k + n_c × z_c = n_u × (z_k + z_c)
-    // Solve for the output component
+    let outputSpeed = 0;
+    let gearRatio = 0;
+    let ratioType = '';
 
-    let outputSpeed;
-    let gearRatio;
-    let ratioType;
-
+    // Use same kinematic relations as before
     if (sunConfig === 'fixed') {
-        // Sun fixed (n_c = 0)
         if (ringConfig === 'input') {
-            // Ring input, carrier output: i^c_ku = (z_k + z_c)/z_k = 1 + 1/K
             carrierSpeed = (ringSpeed * ringTeeth) / (ringTeeth + sunTeeth);
             outputSpeed = carrierSpeed;
             gearRatio = carrierSpeed / ringSpeed;
-            ratioType = 'Ring to Carrier (Sun fixed - "malá redukce")';
+            ratioType = 'Ring->Carrier (Sun fixed)';
         } else {
-            // Carrier input, ring output: i^c_uk = z_k/(z_k + z_c) = K/(K+1)
             ringSpeed = (carrierSpeed * (ringTeeth + sunTeeth)) / ringTeeth;
             outputSpeed = ringSpeed;
             gearRatio = ringSpeed / carrierSpeed;
-            ratioType = 'Carrier to Ring (Sun fixed - "malý rychloběh")';
+            ratioType = 'Carrier->Ring (Sun fixed)';
         }
     } else if (ringConfig === 'fixed') {
-        // Ring fixed (n_k = 0)
         if (sunConfig === 'input') {
-            // Sun input, carrier output: i^k_cu = (z_k + z_c)/z_c = K + 1
             carrierSpeed = (sunSpeed * sunTeeth) / (ringTeeth + sunTeeth);
             outputSpeed = carrierSpeed;
             gearRatio = carrierSpeed / sunSpeed;
-            ratioType = 'Sun to Carrier (Ring fixed - "velká redukce")';
+            ratioType = 'Sun->Carrier (Ring fixed)';
         } else {
-            // Carrier input, sun output: i^k_uc = z_c/(z_k + z_c) = 1/(K+1)
             sunSpeed = (carrierSpeed * (ringTeeth + sunTeeth)) / sunTeeth;
             outputSpeed = sunSpeed;
             gearRatio = sunSpeed / carrierSpeed;
-            ratioType = 'Carrier to Sun (Ring fixed - "velký rychloběh")';
+            ratioType = 'Carrier->Sun (Ring fixed)';
         }
     } else if (carrierConfig === 'fixed') {
-        // Carrier fixed (n_u = 0)
         if (sunConfig === 'input') {
-            // Sun input, ring output: i^u_ck = -z_k/z_c = -K
             ringSpeed = -(sunSpeed * sunTeeth) / ringTeeth;
             outputSpeed = ringSpeed;
             gearRatio = ringSpeed / sunSpeed;
-            ratioType = 'Sun to Ring (Carrier fixed - "zpětná redukce")';
+            ratioType = 'Sun->Ring (Carrier fixed)';
         } else {
-            // Ring input, sun output: i^u_kc = -z_c/z_k = -1/K
             sunSpeed = -(ringSpeed * ringTeeth) / sunTeeth;
             outputSpeed = sunSpeed;
             gearRatio = sunSpeed / ringSpeed;
-            ratioType = 'Ring to Sun (Carrier fixed - "zpětný rychloběh")';
+            ratioType = 'Ring->Sun (Carrier fixed)';
         }
+    } else {
+        throw new Error('Please set one component to fixed in stage config');
     }
 
-    // Display results
-    document.getElementById('outputSpeed').textContent = outputSpeed.toFixed(3) + ' rpm';
-    document.getElementById('gearRatio').textContent = gearRatio.toFixed(1) + ':1';
-    document.getElementById('internalRatio').textContent = K.toFixed(3);
+    // Build formula snippet
+    const formula = `Stage K: z_k/z_c=${K.toFixed(3)}, type=${ratioType}, gearRatio=${gearRatio.toFixed(6)}, out=${outputSpeed.toFixed(6)}`;
 
-    // Build detailed calculation
-    let formulaText = `Configuration:\n`;
-    formulaText += `Sun Gear: ${sunConfig.toUpperCase()} (${sunSpeed.toFixed(3)} rpm)\n`;
-    formulaText += `Planet Carrier: ${carrierConfig.toUpperCase()} (${carrierSpeed.toFixed(3)} rpm)\n`;
-    formulaText += `Ring Gear: ${ringConfig.toUpperCase()} (${ringSpeed.toFixed(3)} rpm)\n\n`;
-
-    formulaText += `Gear Parameters:\n`;
-    formulaText += `Sun teeth (z_c): ${sunTeeth}\n`;
-    formulaText += `Planet teeth (z_s): ${planetTeeth}\n`;
-    formulaText += `Ring teeth (z_k): ${ringTeeth}\n`;
-    formulaText += `Number of planets: ${numPlanets}\n`;
-    formulaText += `Internal ratio (K): z_k/z_c = ${ringTeeth}/${sunTeeth} = ${K.toFixed(3)}\n\n`;
-
-    formulaText += `Basic kinematic equation:\n`;
-    formulaText += `n_k × z_k + n_c × z_c = n_u × (z_k + z_c)\n\n`;
-
-    formulaText += `Calculation:\n`;
-    formulaText += `${ringSpeed.toFixed(3)} × ${ringTeeth} + ${sunSpeed.toFixed(3)} × ${sunTeeth} = ${carrierSpeed.toFixed(3)} × (${ringTeeth} + ${sunTeeth})\n`;
-    formulaText += `${(ringSpeed * ringTeeth).toFixed(3)} + ${(sunSpeed * sunTeeth).toFixed(3)} = ${(carrierSpeed * (ringTeeth + sunTeeth)).toFixed(3)}\n\n`;
-
-    formulaText += `Result:\n`;
-    formulaText += `${ratioType}\n`;
-    formulaText += `Gear Ratio: ${gearRatio.toFixed(3)} ≈ ${gearRatio.toFixed(1)}:1\n`;
-    formulaText += `Output Speed: ${outputSpeed.toFixed(3)} rpm`;
-
-    document.getElementById('calculation').textContent = formulaText;
-    document.getElementById('resultSection').classList.add('show');
+    return { outputSpeed, gearRatio, internalRatio: K, formula, ratioType };
 }
+
+function calculatePlanetary() {
+    try {
+        const stageCount = parseInt(document.getElementById('stageCount').value, 10) || 1;
+        let currentInputSpeed = parseFloat(document.getElementById('inputSpeed').value);
+        if (isNaN(currentInputSpeed)) { alert('Please enter a valid input speed!'); return; }
+
+        let totalRatio = 1;
+        let stageResults = [];
+
+        for (let s = 1; s <= stageCount; s++) {
+            // read per-stage values from DOM with suffix
+            const sunConfig = document.getElementById(`sunConfig-${s}`).value;
+            const carrierConfig = document.getElementById(`carrierConfig-${s}`).value;
+            const ringConfig = document.getElementById(`ringConfig-${s}`).value;
+
+            const sunTeeth = parseFloat(document.getElementById(`sunTeeth-${s}`).value);
+            const planetTeeth = parseFloat(document.getElementById(`planetTeeth-${s}`).value);
+            const ringTeeth = parseFloat(document.getElementById(`ringTeeth-${s}`).value);
+            const numPlanets = parseFloat(document.getElementById(`numPlanets-${s}`).value);
+
+            // basic validation per stage
+            if ([sunTeeth, planetTeeth, ringTeeth].some(v => isNaN(v) || v <= 0)) {
+                alert(`Please enter valid positive teeth counts for stage ${s}!`);
+                return;
+            }
+
+            // Ensure exactly one fixed per stage
+            const configs = [sunConfig, carrierConfig, ringConfig];
+            const fixedCount = configs.filter(c => c === 'fixed').length;
+            const inputCount = configs.filter(c => c === 'input').length;
+            if (fixedCount !== 1 || inputCount !== 1) {
+                alert(`Stage ${s}: please select exactly one Input and one Fixed component (the other may be Output).`);
+                return;
+            }
+
+            const res = computeStage({ sunConfig, carrierConfig, ringConfig, inputSpeed: currentInputSpeed, sunTeeth, planetTeeth, ringTeeth, numPlanets });
+
+            // If computed gearRatio is 0 or NaN, guard
+            if (!isFinite(res.gearRatio)) {
+                alert(`Stage ${s} computed an invalid gear ratio.`);
+                return;
+            }
+
+            totalRatio *= res.gearRatio;
+            stageResults.push({ stage: s, ...res });
+            // feed output as next input
+            currentInputSpeed = res.outputSpeed;
+        }
+
+        // Display combined results
+        const finalOutput = currentInputSpeed;
+
+        document.getElementById('outputSpeed').textContent = finalOutput.toFixed(6) + ' rpm';
+        // show total ratio in decimal and approximate N:1
+        const totalDisplay = totalRatio.toFixed(6);
+        let ratioText;
+        if (totalRatio === 0) ratioText = '0:1';
+        else if (Math.abs(totalRatio) >= 1) ratioText = Math.abs(totalRatio).toFixed(3) + ':1';
+        else ratioText = (1 / Math.abs(totalRatio)).toFixed(3) + ':1';
+        document.getElementById('gearRatio').textContent = `${totalDisplay} / ${ratioText}`;
+
+        // internal ratio: show per-stage K values
+        document.getElementById('internalRatio').textContent = stageResults.map(r => r.internalRatio.toFixed(3)).join(', ');
+
+        // Build calculation text with per-stage details
+        let formulaText = '';
+        stageResults.forEach(r => {
+            formulaText += `Stage ${r.stage}: ${r.formula}\n`;
+        });
+        formulaText += `\nTotal combined gear ratio (product of stage ratios): ${totalRatio.toFixed(6)}\n`;
+        formulaText += `Final output speed: ${finalOutput.toFixed(6)} rpm`;
+
+        document.getElementById('calculation').textContent = formulaText;
+        document.getElementById('resultSection').classList.add('show');
+    } catch (err) {
+        alert(err.message || 'Error calculating stages');
+    }
+}
+
+// show/hide stage blocks when stage count changes
+document.getElementById('stageCount').addEventListener('change', function (e) {
+    const count = parseInt(e.target.value, 10) || 1;
+    for (let s = 1; s <= 3; s++) {
+        const el = document.getElementById(`stage-${s}`);
+        if (!el) continue;
+        el.style.display = s <= count ? 'block' : 'none';
+    }
+});
+
+// UI helpers for Add/Remove buttons
+function addStageUI() {
+    const sel = document.getElementById('stageCount');
+    const current = parseInt(sel.value, 10) || 1;
+    if (current >= 3) return; // max 3
+    sel.value = (current + 1).toString();
+    sel.dispatchEvent(new Event('change'));
+}
+
+function removeStageUI() {
+    const sel = document.getElementById('stageCount');
+    const current = parseInt(sel.value, 10) || 1;
+    if (current <= 1) return;
+    sel.value = (current - 1).toString();
+    sel.dispatchEvent(new Event('change'));
+}
+
+// wire the Add/Remove buttons after DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+    const addBtn = document.getElementById('addStageBtn');
+    const remBtn = document.getElementById('removeStageBtn');
+    if (addBtn) addBtn.addEventListener('click', addStageUI);
+    if (remBtn) remBtn.addEventListener('click', removeStageUI);
+});
 
 // Allow Enter key to calculate
 document.addEventListener('keypress', function (e) {
