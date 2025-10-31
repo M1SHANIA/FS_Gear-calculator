@@ -101,4 +101,4 @@ You can open `index.html` directly in a browser. No build step is strictly requi
 
 ## 📜 License
 
-No license file yet. If you intend to reuse this code, consider adding a license (MIT, Apache-2.0, etc.).
+MIT License
