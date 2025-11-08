@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Planetary Gear Calculator</title>
     <link href="../src/css/style.css" rel="stylesheet" />
+    <script src="../src/js/inertia.js" defer></script>
     <script src="../src/js/planetary.js" defer></script>
     <link rel="icon" type="image/x-icon" href="/gear.png" />
   </head>
@@ -31,8 +32,12 @@
             </select>
           </div>
           <div class="btn-group">
-            <button id="addStageBtn" type="button">Add Stage</button>
-            <button id="removeStageBtn" type="button">Remove Stage</button>
+            <button id="addStageBtn" class="add-stage" type="button">
+              + Add Stage
+            </button>
+            <button id="removeStageBtn" class="remove-stage" type="button">
+              − Remove Stage
+            </button>
           </div>
         </div>
 
@@ -71,6 +76,16 @@
             value="1"
           />
         </div>
+
+        <!-- Inertia Calculation Checkbox -->
+        <div class="checkbox-container">
+          <label for="enableInertia">
+            <input type="checkbox" id="enableInertia" />
+            <span class="toggle-switch"></span>
+            <span>Enable Inertia Calculation</span>
+          </label>
+        </div>
+
         <div id="stagesContainer">
           <!-- Stage 1 (default) -->
           <div class="stage-block" id="stage-1">
@@ -123,6 +138,59 @@
                 />
               </div>
             </div>
+
+            <!-- Inertia Inputs (Stage 1) -->
+            <div
+              class="card-panel inertia-panel"
+              id="inertia-panel-1"
+              style="display: none"
+            >
+              <h3 class="panel-title">Stage 1 - Inertia Inputs (kg·m²)</h3>
+
+              <div class="input-group">
+                <label for="J_sun-1">Sun Gear Inertia:</label>
+                <input
+                  type="number"
+                  id="J_sun-1"
+                  placeholder="e.g., 0.001"
+                  step="0.0001"
+                  min="0"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="J_planet-1">Planet Gear Inertia (per gear):</label>
+                <input
+                  type="number"
+                  id="J_planet-1"
+                  placeholder="e.g., 0.0005"
+                  step="0.0001"
+                  min="0"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="J_ring-1">Ring Gear Inertia:</label>
+                <input
+                  type="number"
+                  id="J_ring-1"
+                  placeholder="e.g., 0.002"
+                  step="0.0001"
+                  min="0"
+                />
+              </div>
+
+              <div class="input-group">
+                <label for="J_carrier-1">Carrier Inertia:</label>
+                <input
+                  type="number"
+                  id="J_carrier-1"
+                  placeholder="e.g., 0.0015"
+                  step="0.0001"
+                  min="0"
+                />
+              </div>
+            </div>
           </div>
 
           <!-- Stage 2 (hidden by default) -->
@@ -141,6 +209,26 @@
                   placeholder="e.g., 22"
                   step="1"
                   min="1"
+                />
+              </div>
+            </div>
+
+            <!-- Inertia Inputs (Stage 2) -->
+            <div
+              class="card-panel inertia-panel"
+              id="inertia-panel-2"
+              style="display: none"
+            >
+              <h3 class="panel-title">Stage 2 - Inertia Inputs (kg·m²)</h3>
+
+              <div class="input-group">
+                <label for="J_planet-2">Planet Gear Inertia (per gear):</label>
+                <input
+                  type="number"
+                  id="J_planet-2"
+                  placeholder="e.g., 0.0005"
+                  step="0.0001"
+                  min="0"
                 />
               </div>
             </div>
@@ -165,6 +253,26 @@
                 />
               </div>
             </div>
+
+            <!-- Inertia Inputs (Stage 3) -->
+            <div
+              class="card-panel inertia-panel"
+              id="inertia-panel-3"
+              style="display: none"
+            >
+              <h3 class="panel-title">Stage 3 - Inertia Inputs (kg·m²)</h3>
+
+              <div class="input-group">
+                <label for="J_planet-3">Planet Gear Inertia (per gear):</label>
+                <input
+                  type="number"
+                  id="J_planet-3"
+                  placeholder="e.g., 0.0005"
+                  step="0.0001"
+                  min="0"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -183,6 +291,10 @@
         <div class="result-item">
           <div class="result-label">Internal Ratio (K):</div>
           <div class="result-value" id="internalRatio">-</div>
+        </div>
+        <div class="result-item" id="inertiaResultItem" style="display: none">
+          <div class="result-label">Equiv. Inertia:</div>
+          <div class="result-value" id="equivalentInertia">-</div>
         </div>
         <div class="formula" id="calculation">-</div>
       </div>

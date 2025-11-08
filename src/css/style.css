@@ -54,19 +54,50 @@ label {
   font-size: 0.95em;
 }
 
-input {
+input[type="number"] {
   width: 100%;
   padding: 12px 15px;
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   font-size: 1em;
   transition: all 0.3s;
+  background: white;
 }
 
-input:focus {
+input[type="number"]:hover {
+  border-color: #b0b0b0;
+}
+
+input[type="number"]:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+input[type="number"]::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+select:hover {
+  border-color: #667eea;
 }
 
 .gear-chain {
@@ -117,15 +148,41 @@ button:active {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   padding: 10px 20px;
   font-size: 0.95em;
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 .remove-stage {
   background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-  padding: 8px 15px;
-  font-size: 0.85em;
-  margin-top: 10px;
-  width: auto;
+  padding: 10px 20px;
+  font-size: 0.95em;
+  margin-top: 0;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-group button {
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 0.9em;
+  margin-top: 0;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .input-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .result-section {
@@ -178,12 +235,35 @@ button:active {
 
 .formula {
   background: rgba(255, 255, 255, 0.1);
-  padding: 15px;
+  padding: 20px;
   border-radius: 10px;
   margin-top: 15px;
   font-family: "Courier New", monospace;
   font-size: 0.9em;
-  line-height: 1.6;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.formula::-webkit-scrollbar {
+  width: 8px;
+}
+
+.formula::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.formula::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.formula::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .stages-container {
@@ -244,11 +324,34 @@ button:active {
   border-radius: 10px;
   margin-bottom: 20px;
   border: 2px solid #e0e0e0;
+  transition: all 0.3s;
+}
+
+.card-panel:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .panel-title {
   color: #667eea;
   margin-bottom: 15px;
+  font-size: 1.1em;
+}
+
+.stage-block {
+  margin-bottom: 25px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .label-strong {
@@ -259,4 +362,139 @@ button:active {
 .gear-list-input {
   width: 100%;
   margin-top: 6px;
+}
+
+/* Checkbox Toggle Switch */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.checkbox-container label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hide default checkbox */
+input[type="checkbox"] {
+  display: none;
+}
+
+/* Custom toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  background: #e0e0e0;
+  border-radius: 13px;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input[type="checkbox"]:checked + .toggle-switch {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+input[type="checkbox"]:checked + .toggle-switch::after {
+  transform: translateX(24px);
+}
+
+.toggle-switch:hover {
+  opacity: 0.9;
+}
+
+/* Fixed display styling */
+.fixed-display {
+  background: #f0f0f0;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  color: #667eea;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+/* Stage selector styling */
+#stageCount {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1em;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+/* Stage controls */
+.stage-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.stage-controls button {
+  flex: 1;
+  margin-top: 0;
+}
+
+/* Improve button spacing */
+button + button {
+  margin-left: 0;
+}
+
+/* Inertia panel styling */
+.inertia-panel {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px dashed #667eea;
+}
+
+.inertia-panel .panel-title {
+  color: #764ba2;
+}
+
+.inertia-panel:hover {
+  border-color: #764ba2;
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.15);
+}
+
+/* Result value size adjustment */
+.result-value {
+  font-size: 1.6em;
+  font-weight: bold;
+  word-break: break-all;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: background, border-color, transform, box-shadow, opacity;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+button,
+input,
+select,
+.card-panel,
+.toggle-switch {
+  transition-duration: 0.3s;
 }

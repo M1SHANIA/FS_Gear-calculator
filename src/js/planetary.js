@@ -139,6 +139,101 @@ function calculatePlanetary() {
         stageResults.forEach(r => { formulaText += `Stage ${r.stage}: ${r.formula}\n`; });
         formulaText += `\nTotal combined gear ratio (product of stage ratios): ${totalRatio.toFixed(6)}\n`;
         formulaText += `Final output speed: ${finalOutput.toFixed(6)} rpm`;
+
+        // Calculate inertia if enabled
+        const inertiaEnabled = document.getElementById('enableInertia')?.checked;
+        if (inertiaEnabled && typeof calculateTotalInertia === 'function') {
+            try {
+                // Collect inertia inputs for each stage
+                const inertiaInputs = [];
+
+                // Stage 1 - full component set
+                const J_sun_1 = parseFloat(document.getElementById('J_sun-1')?.value) || 0;
+                const J_planet_1 = parseFloat(document.getElementById('J_planet-1')?.value) || 0;
+                const J_ring_1 = parseFloat(document.getElementById('J_ring-1')?.value) || 0;
+                const J_carrier_1 = parseFloat(document.getElementById('J_carrier-1')?.value) || 0;
+                inertiaInputs.push({
+                    J_sun: J_sun_1,
+                    J_planet: J_planet_1,
+                    J_ring: J_ring_1,
+                    J_carrier: J_carrier_1
+                });
+
+                // Additional stages (only planet inertia for half-stages)
+                for (let s = 2; s <= stageCount; s++) {
+                    const J_planet = parseFloat(document.getElementById(`J_planet-${s}`)?.value) || 0;
+                    inertiaInputs.push({
+                        J_sun: J_planet, // Use planet inertia as the sun for half-stage
+                        J_planet: J_planet,
+                        J_ring: J_ring_1, // Share main ring
+                        J_carrier: J_carrier_1 // Share main carrier
+                    });
+                }
+
+                // Prepare stage data for inertia calculation
+                const stages = stageResults.map((r, idx) => {
+                    const stageNum = idx + 1;
+                    let sunTeeth, planetTeeth, ringTeeth, numPlanets;
+
+                    if (stageNum === 1) {
+                        sunTeeth = sunTeethMain;
+                        planetTeeth = parseFloat(document.getElementById('planetTeeth-1').value);
+                        ringTeeth = ringTeethMain;
+                        numPlanets = numPlanetsMain;
+                    } else {
+                        const planetTeethS = parseFloat(document.getElementById(`planetTeeth-${stageNum}`).value);
+                        sunTeeth = planetTeethS; // Half-stage interpretation
+                        planetTeeth = planetTeethS;
+                        ringTeeth = ringTeethMain;
+                        numPlanets = numPlanetsMain;
+                    }
+
+                    return {
+                        sunConfig,
+                        carrierConfig,
+                        ringConfig,
+                        gearRatio: r.gearRatio,
+                        sunTeeth,
+                        planetTeeth,
+                        ringTeeth,
+                        numPlanets
+                    };
+                });
+
+                const inertiaResult = calculateTotalInertia(stages, inertiaInputs);
+
+                // Display inertia in separate field
+                const inertiaResultItem = document.getElementById('inertiaResultItem');
+                const equivalentInertiaEl = document.getElementById('equivalentInertia');
+                if (inertiaResultItem && equivalentInertiaEl) {
+                    inertiaResultItem.style.display = 'block';
+                    equivalentInertiaEl.textContent = `${inertiaResult.J_total.toFixed(8)} kg·m²`;
+                }
+
+                // Display detailed inertia breakdown in calculation textarea
+                formulaText += `\n\n=== INERTIA ANALYSIS ===\n`;
+                formulaText += `Total Equivalent Inertia (reflected to input): ${inertiaResult.J_total.toFixed(8)} kg·m²\n\n`;
+
+                inertiaResult.stages_breakdown.forEach((stageData, idx) => {
+                    formulaText += `Stage ${idx + 1} contribution:\n`;
+                    formulaText += `  J_input component: ${stageData.breakdown.J_input.toFixed(8)} kg·m²\n`;
+                    formulaText += `  J_output reflected: ${stageData.breakdown.J_output.toFixed(8)} kg·m²\n`;
+                    formulaText += `  J_planets reflected: ${stageData.breakdown.J_planets.toFixed(8)} kg·m²\n`;
+                    formulaText += `  Stage equivalent: ${stageData.J_equivalent.toFixed(8)} kg·m²\n`;
+                    formulaText += `  Reflected through ratio ${stageData.accumulated_ratio.toFixed(6)}: ${stageData.J_reflected.toFixed(8)} kg·m²\n\n`;
+                });
+
+            } catch (inertiaErr) {
+                formulaText += `\n\nInertia calculation error: ${inertiaErr.message}`;
+            }
+        } else {
+            // Hide inertia result if not enabled
+            const inertiaResultItem = document.getElementById('inertiaResultItem');
+            if (inertiaResultItem) {
+                inertiaResultItem.style.display = 'none';
+            }
+        }
+
         document.getElementById('calculation').textContent = formulaText;
         document.getElementById('resultSection').classList.add('show');
     } catch (err) {
@@ -179,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const remBtn = document.getElementById('removeStageBtn');
     if (addBtn) addBtn.addEventListener('click', addStageUI);
     if (remBtn) remBtn.addEventListener('click', removeStageUI);
+
     // wire global role pickers to update the Fixed display
     const inGlobal = document.getElementById('roleInput');
     const outGlobal = document.getElementById('roleOutput');
@@ -194,6 +290,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (inGlobal) inGlobal.addEventListener('change', updateFixed);
     if (outGlobal) outGlobal.addEventListener('change', updateFixed);
     updateFixed();
+
+    // Wire inertia checkbox to show/hide inertia input panels
+    const inertiaCheckbox = document.getElementById('enableInertia');
+    if (inertiaCheckbox) {
+        inertiaCheckbox.addEventListener('change', function () {
+            const inertiaPanels = document.querySelectorAll('.inertia-panel');
+            const display = this.checked ? 'block' : 'none';
+            inertiaPanels.forEach(panel => {
+                panel.style.display = display;
+            });
+        });
+    }
 });
 
 // Sync role-picker choices into the underlying per-component selects (sunConfig, carrierConfig, ringConfig)
